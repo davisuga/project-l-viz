@@ -1,0 +1,31 @@
+{
+  "name": "vite-react-rescript-starter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "clean": "rescript clean -with-deps",
+    "format": "rescript format -all",
+    "serve": "vite preview",
+    "start": "vite",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@rescript/react": "^0.10.3",
+    "@ryyppy/rescript-promise": "^2.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rescript-webapi": "^0.6.1"
+  },
+  "devDependencies": {
+    "@jihchi/vite-plugin-rescript": "^4.1.1",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@vitejs/plugin-react": "^2.1.0",
+    "jsdom": "^20.0.0",
+    "rescript": "^10.0.1",
+    "rescript-vitest": "^0.3.0",
+    "vite": "^3.1.2",
+    "vitest": "^0.23.2"
+  }
+}
