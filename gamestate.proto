@@ -1,0 +1,36 @@
+enum Piece {
+    L = 1;
+    Green = 2;
+    Corner = 3;
+    Purple = 4;
+    T = 5;
+    Red = 6;
+    Ladder = 7;
+    Dot = 8;
+}
+
+message IntList {
+    repeated int32 values = 1;
+}
+
+message Puzzle {
+    required int32 id = 1;
+    required Piece reward = 2;
+    required int32 points = 3;
+    repeated IntList content = 4;
+}
+
+message PieceQuantity {
+    required Piece piece = 1;
+    required int32 quantity = 2;
+}
+
+message GameState {
+    required int32 black_cards_left = 1;
+    required int32 white_cards_left = 2;
+    repeated Puzzle black_cards = 3;
+    repeated Puzzle white_cards = 4;
+    required int32 score = 5;
+    repeated Puzzle deck = 6;
+    repeated PieceQuantity available_pieces = 7;
+}
