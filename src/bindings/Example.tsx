@@ -160,7 +160,7 @@ const rotateMatrix = (matrix: number[][], degrees: number): number[][] => {
   }
   return rotateMatrix(rotated, degrees - 90);
 };
-const mocked: ProjectL.GameState = {
+const mockedGameState: ProjectL.GameState = {
   availablePieces: [
     {
       piece: ProjectL.Piece.L,
@@ -213,8 +213,29 @@ const mocked: ProjectL.GameState = {
   ],
   blackCardsLeft: 7,
   whiteCardsLeft: 5,
-  deck: [],
+  deck: [
+    {
+      content: examplePuzzle.map((x) => ({ values: x })),
+      points: 3,
+      id: 1,
+      reward: ProjectL.Piece.Purple,
+    },
+    {
+      content: examplePuzzle.map((x) => ({ values: x })),
+      points: 3,
+      id: 1,
+      reward: ProjectL.Piece.Purple,
+    },
+    {
+      content: examplePuzzle.map((x) => ({ values: x })),
+      points: 3,
+      id: 1,
+      reward: ProjectL.Piece.Purple,
+    },
+  ],
+  score: 777,
 };
+
 export const Game = ({ value }: { value: ProjectL.GameState }) => {
   return (
     <Suspense fallback={"loading..."}>
@@ -288,5 +309,5 @@ export const Game = ({ value }: { value: ProjectL.GameState }) => {
 };
 
 export const Example = () => {
-  return <Game />;
+  return <Game value={mockedGameState} />;
 };
