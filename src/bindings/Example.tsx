@@ -12,6 +12,7 @@ import {
 import { Flex, Box } from "@react-three/flex";
 const black = "#2a2a2a";
 import * as ProjectL from "../gamestate";
+import { colorOfPiece, PieceType, shapeOfPiece } from "../gamestate";
 const examplePuzzle = [
   [0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0],
@@ -65,14 +66,16 @@ function MatrixRender({
 export const Card = ({
   board,
   position = [0, 0, 0],
-  reward,
+  shape,
   score,
+  color,
   ...props
 }: {
   board: number[][];
   position?: [number, number, number];
-  reward: Piece;
+  shape: ProjectL.Matrix5x5;
   score: number;
+  color: string;
 }) => {
   const length = board.length;
 
@@ -80,10 +83,10 @@ export const Card = ({
     <Box position={position}>
       <MatrixRender value={examplePuzzle} position={[0, 0, 0]}></MatrixRender>
       <MatrixRender
-        value={reward.piece}
+        value={shape}
         position={[4, 1.5, 0.4]}
         scale={0.4}
-        color={reward.color}
+        color={color}
       ></MatrixRender>
       <RoundedBox
         smoothness={5}
@@ -111,7 +114,7 @@ const boardMatrix: number[][] = Array(4).fill(Array(2).fill(0));
 
 export const Grid = <T extends unknown>({
   data,
-  Component,
+  render,
   componentSize,
   spacing,
   rows = 2,
@@ -119,7 +122,7 @@ export const Grid = <T extends unknown>({
   position = [0, 0, 0],
 }: {
   data: T[];
-  Component: React.ReactNode;
+  render: (item: T) => React.ReactNode;
   componentSize: [number, number];
   spacing: [number, number];
   rows?: number;
@@ -135,105 +138,20 @@ export const Grid = <T extends unknown>({
   return (
     <Box position={position}>
       {resized.map((row, i) =>
-        row.map((_, j) => {
+        row.map((item, j) => {
           const x = j * (spacing[0] + componentSize[0]);
           const y = i * (spacing[1] + componentSize[1]);
 
           return (
             <Box key={i + j} position={[x, y, 0]}>
-              {Component}
+              {render(item)}
             </Box>
           );
         })
       )}
+      ,
     </Box>
   );
-};
-
-const rotateMatrix = (matrix: number[][], degrees: number): number[][] => {
-  if (degrees === 0) return matrix;
-  const rotated = matrix.map((row, i) =>
-    row.map((_, j) => matrix[matrix.length - 1 - j][i])
-  );
-  if (degrees <= 90) {
-    return rotated;
-  }
-  return rotateMatrix(rotated, degrees - 90);
-};
-const mockedGameState: ProjectL.GameState = {
-  availablePieces: [
-    {
-      piece: ProjectL.Piece.L,
-      quantity: 5,
-    },
-    {
-      piece: ProjectL.Piece.Purple,
-      quantity: 2,
-    },
-  ],
-  blackCards: [
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 4,
-      id: 1,
-      reward: ProjectL.Piece.Purple,
-    },
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 3,
-      id: 1,
-      reward: ProjectL.Piece.L,
-    },
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 4,
-      id: 1,
-      reward: ProjectL.Piece.Purple,
-    },
-  ],
-  whiteCards: [
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 1,
-      id: 1,
-      reward: ProjectL.Piece.Purple,
-    },
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 2,
-      id: 1,
-      reward: ProjectL.Piece.L,
-    },
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 3,
-      id: 1,
-      reward: ProjectL.Piece.Purple,
-    },
-  ],
-  blackCardsLeft: 7,
-  whiteCardsLeft: 5,
-  deck: [
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 3,
-      id: 1,
-      reward: ProjectL.Piece.Purple,
-    },
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 3,
-      id: 1,
-      reward: ProjectL.Piece.Purple,
-    },
-    {
-      content: examplePuzzle.map((x) => ({ values: x })),
-      points: 3,
-      id: 1,
-      reward: ProjectL.Piece.Purple,
-    },
-  ],
-  score: 777,
 };
 
 export const Game = ({ value }: { value: ProjectL.GameState }) => {
@@ -248,9 +166,9 @@ export const Game = ({ value }: { value: ProjectL.GameState }) => {
           fontSize: 20,
         }}
       >
-        <div>Score: {value?.score}</div>
-        <div>White cards left: {value?.whiteCardsLeft}</div>
-        <div>Black cards left: {value?.blackCardsLeft}</div>
+        <div>Score: {value?.players_points[0]}</div>
+        <div>White cards left: {value?.white_puzzles_remaining}</div>
+        <div>Black cards left: {value?.black_puzzles_remaining}</div>
       </div>
       <Canvas
         camera={{ fov: 75, near: 0.1, far: 1000, position: [0, 0, 40] }}
@@ -260,45 +178,45 @@ export const Game = ({ value }: { value: ProjectL.GameState }) => {
         <pointLight position={[10, 10, 10]} />
 
         <Grid
-          data={Array(8).fill(0)}
-          Component={
+          data={[...value.black_puzzles, ...value.white_puzzles]}
+          render={(item) => (
             <Card
-              board={examplePuzzle}
+              board={item.matrix}
               position={[0, 0, 0]}
-              reward={L}
+              color={colorOfPiece[item.reward]}
+              shape={shapeOfPiece[item.reward]}
               score={1}
             />
-          }
+          )}
           componentSize={[10, 10]}
           spacing={[0, 0]}
         />
         <Grid
           position={[-2, -30, 0]}
-          data={Array(16).fill(0)}
-          columns={8}
-          rows={2}
-          Component={
+          data={Object.values(value.players_pieces[0])}
+          render={(item: PieceType) => (
             <MatrixRender
-              value={rotateMatrix(L.piece, 90)}
+              value={shapeOfPiece[item]}
               position={[0, 0, 0]}
-              color={L.color}
+              color={colorOfPiece[item]}
             ></MatrixRender>
-          }
+          )}
           componentSize={[5, 5]}
           spacing={[0, 0]}
         />
         <Grid
-          data={Array(4).fill(0)}
+          data={value.players_puzzles[0]}
           columns={4}
           rows={1}
-          Component={
+          render={(item) => (
             <Card
               board={examplePuzzle}
               position={[0, -15, 0]}
-              reward={L}
+              color={colorOfPiece[item.reward]}
+              shape={shapeOfPiece[item.reward]}
               score={1}
             />
-          }
+          )}
           componentSize={[10, 10]}
           spacing={[0, 0]}
         />
@@ -309,5 +227,5 @@ export const Game = ({ value }: { value: ProjectL.GameState }) => {
 };
 
 export const Example = () => {
-  return <Game value={mockedGameState} />;
+  return <Game value={ProjectL.sample} />;
 };
